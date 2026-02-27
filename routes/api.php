@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\Api\ApplicationController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\JobController;
 use Illuminate\Http\Request;
@@ -20,4 +21,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/jobs', [JobController::class, 'store']);
     Route::put('/jobs/{job}', [JobController::class, 'update']);
     Route::delete('/jobs/{job}', [JobController::class, 'destroy']);
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+
+    // apply to job
+    Route::post('/jobs/{job}/apply', [ApplicationController::class, 'apply']);
+
+    // view applicants for job
+    Route::get('/jobs/{job}/applicants', [ApplicationController::class, 'applicants']);
+
 });
