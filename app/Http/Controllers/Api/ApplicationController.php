@@ -17,6 +17,12 @@ class ApplicationController extends Controller
             ->where('job_id', $job->id)
             ->exists();
 
+        if ($request->user()->role !== 'applicant') {
+            return response()->json([
+                'message' => 'Only applicants can apply'
+            ], 403);
+        }
+
         if ($exists) {
             return response()->json([
                 'message' => 'You already applied to this job'

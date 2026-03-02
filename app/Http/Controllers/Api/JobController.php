@@ -24,6 +24,12 @@ class JobController extends Controller
             'location' => 'required'
         ]);
 
+        if ($request->user()->role !== 'company') {
+            return response()->json([
+                'message' => 'Only companies can post jobs'
+            ], 403);
+        }
+
         $job = Job::create([
             'title' => $request->title,
             'description' => $request->description,
