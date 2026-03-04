@@ -3,19 +3,42 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreJobRequest;
+use App\Http\Resources\JobResource;
 use App\Models\Job;
+use Illuminate\Http\Request;
 
 class JobController extends Controller
 {
     // List all jobs
-    public function index()
-    {
-        return Job::with('user')->latest()->get();
+public function index(Request $request)
+{
+    // return Job::with('user')->latest()->get();
+
+    $query = Job::query()->with('user');
+
+    // search by title
+    if ($request->search) {
+        $query->where('title', 'like', '%' . $request->search . '%');
     }
 
+    // filter by location
+    if ($request->location) {
+        $query->where('location', $request->location);
+    }
+
+    // filter by minimum salary
+    if ($request->min_salary) {
+        $query->where('salary', '>=', $request->min_salary);
+    }
+
+    return JobResource::collection(
+        $query->latest()->paginate(5)
+    );
+}
+
     // Create job
-    public function store(Request $request)
+    public function store(StoreJobRequest $request)
     {
         $request->validate([
             'title' => 'required',
@@ -39,7 +62,11 @@ class JobController extends Controller
             'user_id' => $request->user()->id
         ]);
 
-        return response()->json($job, 201);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Job created successfully',
+            'data' => new JobResource($job)
+        ], 201);
     }
 
     // Show single job
@@ -58,6 +85,8 @@ class JobController extends Controller
         $job->update($request->all());
 
         return $job;
+
+        return new JobResource($job->load('user'));
     }
 
     // Delete job (only owner)
