@@ -83,7 +83,7 @@ public function index(Request $request)
         }
 
         $job->update($request->all());
-
+    
         return $job;
 
         return new JobResource($job->load('user'));
